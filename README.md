@@ -4,13 +4,13 @@
 
 **在线地址：** [https://alexcz-a11y.github.io/claude-code-settings-zh/](https://alexcz-a11y.github.io/claude-code-settings-zh/)
 
-第一次打开前，仓库主人需要在 GitHub 打开 Pages（云端 token 没有仓库管理权限，无法代开）：
+第一次打开前，仓库主人需要在 GitHub 打开 Pages（创建 Pages 站点是仓库管理操作，云端 token 做不了）：
 
 1. 打开 [Settings → Pages](https://github.com/alexcz-a11y/claude-code-settings-zh/settings/pages)
-2. **最快：** Build and deployment → Source 选 **Deploy from a branch**，Branch 选 `main`，文件夹选 `/ (root)`
-3. **或：** Source 选 **GitHub Actions**，然后重新跑 `.github/workflows/pages.yml`
+2. Build and deployment → Source 选 **Deploy from a branch**
+3. Branch 选 `main`，文件夹选 `/ (root)`，保存
 
-静态文件已经在 `main` 根目录。iPhone Safari 打开上面的地址即可。
+静态文件已经在 `main` 根目录，不需要 GitHub Actions。选 Actions 反而会因为站点尚未创建而红掉。iPhone Safari 打开上面的地址即可。
 
 这不是配置生成器，也不收录任何人的真实配置。页面只对照官方文档里的键名、类型、默认值和允许值。
 
@@ -77,4 +77,4 @@ python3 tools/build.py
 
 ## GitHub Pages
 
-站点从 `main` 分支根目录发布。工作流见 `.github/workflows/pages.yml`。
+站点从 `main` 分支根目录发布（Deploy from a branch），没有构建步骤。
