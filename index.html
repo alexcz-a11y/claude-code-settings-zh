@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#11110F" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="把官方 Claude Code settings.json 与 ~/.claude.json 字段对照成中文。只收录官方文档写明的键。">
+  <title>Claude Code 配置中文对照</title>
+  <link rel="stylesheet" href="./assets/app.css">
+</head>
+<body>
+  <a class="skip" href="#results">跳到字段列表</a>
+
+  <header class="top">
+    <div class="top-inner">
+      <p class="eyebrow">Claude Code · 官方字段对照</p>
+      <h1>配置键中文手册</h1>
+      <p class="lede">把 <code>settings.json</code> 与 <code>~/.claude.json</code> 的官方键翻成中文。英文键名、路径、枚举保持原文。未在官方文档写明的值不会猜。</p>
+
+      <div class="search-wrap" role="search">
+        <label class="sr-only" for="q">搜索字段</label>
+        <input id="q" type="search" enterkeyhint="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="搜索键名、中文或主题">
+      </div>
+
+      <div class="seg" role="tablist" aria-label="对照范围">
+        <button type="button" class="seg-btn is-on" role="tab" aria-selected="true" data-tab="settings">settings.json</button>
+        <button type="button" class="seg-btn" role="tab" aria-selected="false" data-tab="global">~/.claude.json</button>
+        <button type="button" class="seg-btn" role="tab" aria-selected="false" data-tab="precedence">优先级</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="panel-settings" class="panel is-on" data-panel="settings">
+      <p class="count" id="count"></p>
+      <div id="results"></div>
+    </section>
+
+    <section id="panel-global" class="panel" hidden data-panel="global">
+      <article class="note">
+        <h2>这是另一份文件</h2>
+        <p>官方写明：Claude Code 会自己写 <code>~/.claude.json</code>。它保存登录会话、MCP 服务器、每个项目的信任状态，以及 <code>/config</code> 写入的一小撮全局配置键。</p>
+        <p>不要把密钥、OAuth token 或真实的 <code>~/.claude.json</code> 贴到网页或仓库。本页只收录官方 <a href="https://code.claude.com/docs/en/settings-reference#global-config-settings">Global config settings</a> 列出的键。</p>
+        <ul>
+          <li>登录会话与 token：官方由 CLI 自己写，本页不展示任何示例。</li>
+          <li>个人 MCP：可用 <code>claude mcp add --scope user</code>，会写到这份文件，而不是项目 <code>.mcp.json</code>。</li>
+          <li>这些键放进 <code>settings.json</code> 会被忽略。</li>
+        </ul>
+      </article>
+      <p class="count" id="count-global"></p>
+      <div id="results-global"></div>
+    </section>
+
+    <section id="panel-precedence" class="panel" hidden data-panel="precedence">
+      <article class="note">
+        <h2>两份文件怎么对照</h2>
+        <ol class="files">
+          <li><strong>用户</strong> <code>~/.claude/settings.json</code> — 你在这台机器的每个项目。</li>
+          <li><strong>项目共享</strong> <code>.claude/settings.json</code> — 提交后全员生效。</li>
+          <li><strong>项目本地</strong> <code>.claude/settings.local.json</code> — 只影响你在这个项目；通常不进 git。</li>
+          <li><strong>托管</strong> <code>managed-settings.json</code> / MDM / claude.ai 控制台 — 组织策略，你改不掉（少量安全例外除外）。</li>
+          <li><strong>全局配置</strong> <code>~/.claude.json</code> — 不是 settings 文件；只放官方 Global config 键和 CLI 自己写的状态。</li>
+        </ol>
+      </article>
+
+      <article class="note">
+        <h2>优先级（高 → 低）</h2>
+        <ol class="stack">
+          <li><span>1</span><div><strong>托管设置</strong><code>managed-settings.json</code>、MDM 或 claude.ai 控制台</div></li>
+          <li><span>2</span><div><strong>命令行</strong><code>--settings</code> / 启动标志，只影响这一次会话</div></li>
+          <li><span>3</span><div><strong>项目本地</strong><code>.claude/settings.local.json</code></div></li>
+          <li><span>4</span><div><strong>项目共享</strong><code>.claude/settings.json</code></div></li>
+          <li><span>5</span><div><strong>用户</strong><code>~/.claude/settings.json</code></div></li>
+        </ol>
+        <p>环境变量不是这一叠里的一层。某个键和某个变量谁赢，以该键的官方条目为准。</p>
+      </article>
+
+      <article class="note">
+        <h2>列表通常合并</h2>
+        <p>同一列表键（例如 <code>permissions.allow</code>）出现在多个文件时，Claude Code 一般会合并，而不是只留一份。</p>
+        <p>官方点名的例外：</p>
+        <ul>
+          <li><code>fallbackModel</code> 是有顺序的链，取最高优先级文件里的整份值，不合并。</li>
+          <li><code>modelPicker</code> 也不合并。只从托管、<code>--settings</code>、用户设置里取最高的一份；项目和本地文件里的该键会被忽略。</li>
+          <li>托管来源一旦定义 <code>availableModels</code>，就按托管名单原样生效，不再合并你在用户 / 项目 / 本地里加的条目。</li>
+        </ul>
+      </article>
+
+      <article class="note">
+        <h2>仓库文件里会被忽略的范围</h2>
+        <p>Scope 若是「用户或托管」「用户 / 本地 / 托管」「仅托管」「仅 ~/.claude.json」，共享的 <code>.claude/settings.json</code> 通常不会生效。官方例外：<code>autoContinueAtUsageLimit</code> 仍可被仓库文件关掉。</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>官方文档抓取日期：<time datetime="2026-08-26">2026-08-26</time>。</p>
+    <p>来源：<a href="https://code.claude.com/docs/en/settings-reference">settings-reference</a> · <a href="https://code.claude.com/docs/en/settings">settings</a> · <a href="https://code.claude.com/docs/en/settings-example">settings-example</a> · <a href="https://code.claude.com/docs/en/claude-directory">claude-directory</a> · <a href="https://code.claude.com/docs/en/permissions">permissions</a> · <a href="https://code.claude.com/docs/en/permission-modes">permission-modes</a> · <a href="https://json.schemastore.org/claude-code-settings.json">JSON Schema</a></p>
+    <p>相关：<a href="https://code.claude.com/docs/en/data-usage">data-usage</a> · <a href="https://code.claude.com/docs/en/context-window">context-window</a> · <a href="https://code.claude.com/docs/en/prompt-caching">prompt-caching</a> · <a href="https://code.claude.com/docs/en/sandboxing">sandboxing</a> · <a href="https://code.claude.com/docs/en/model-config">model-config</a> · <a href="https://code.claude.com/docs/en/managed-settings">managed-settings</a></p>
+    <p>JSON Schema 可能落后于 CLI。未在官方 All settings 索引出现的 schema 键会单独标成「未在官方文档写明」，本页不猜测枚举。</p>
+    <p>不含任何用户密钥、API key 或真实 <code>~/.claude.json</code> 内容。</p>
+  </footer>
+
+  <script src="./assets/app.js" type="module"></script>
+</body>
+</html>
